@@ -17,12 +17,14 @@ const videoMonitor = document.querySelector('#video-monitor');
 const startButton = document.querySelector('button#start');
 const callButton = document.querySelector('button#call');
 const hangupButton = document.querySelector('button#hangup');
+const clogButton = document.querySelector('button#clog');
 
 const cryptoKey = document.querySelector('#crypto-key');
 const cryptoOffsetBox = document.querySelector('#crypto-offset');
 const banner = document.querySelector('#banner');
 const muteMiddleBox = document.querySelector('#mute-middlebox');
 
+clogButton.onclick = clog;
 startButton.onclick = start;
 callButton.onclick = call;
 hangupButton.onclick = hangup;
@@ -39,7 +41,7 @@ let localStream;
 let remoteStream;
 
 const supportsInsertableStreams =
-      !!RTCRtpSender.prototype.createEncodedStreams;
+  !!RTCRtpSender.prototype.createEncodedStreams;
 
 let supportsTransferableStreams = false;
 try {
@@ -52,7 +54,7 @@ try {
 
 if (!(supportsInsertableStreams && supportsTransferableStreams)) {
   banner.innerText = 'Your browser does not support Insertable Streams. ' +
-  'This sample will not work.';
+    'This sample will not work.';
   if (adapter.browserDetails.browser === 'chrome') {
     banner.innerText += ' Try with Enable experimental Web Platform features enabled from chrome://flags.';
   }
@@ -77,21 +79,21 @@ function gotRemoteStream(stream) {
 function start() {
   console.log('Requesting local stream');
   startButton.disabled = true;
-  const options = {audio: true, video: true};
+  const options = { audio: true, video: true };
   navigator.mediaDevices
-      .getUserMedia(options)
-      .then(gotStream)
-      .catch(function(e) {
-        alert('getUserMedia() failed');
-        console.log('getUserMedia() error: ', e);
-      });
+    .getUserMedia(options)
+    .then(gotStream)
+    .catch(function (e) {
+      alert('getUserMedia() failed');
+      console.log('getUserMedia() error: ', e);
+    });
 }
 
 // We use a Worker to do the encryption and decryption.
 // See
 //   https://developer.mozilla.org/en-US/docs/Web/API/Worker
 // for basic concepts.
-const worker = new Worker('./js/worker.js', {name: 'E2EE worker'});
+const worker = new Worker('./js/worker.js', { name: 'E2EE worker' });
 function setupSenderTransform(sender) {
   const senderStreams = sender.createEncodedStreams();
   // Instead of creating the transform stream here, we do a postMessage to the worker. The first
@@ -130,6 +132,8 @@ function setupReceiverTransform(receiver) {
 function call() {
   callButton.disabled = true;
   hangupButton.disabled = false;
+  clogButton.disabled = false;
+
   console.log('Starting call');
   // The real use case is where the middle box relays the
   // packets and listens in, but since we don't have
@@ -179,4 +183,16 @@ function setCryptoKey(event) {
 function toggleMute(event) {
   video2.muted = muteMiddleBox.checked;
   videoMonitor.muted = !muteMiddleBox.checked;
+}
+
+function clog() {
+  const arr = [1];
+
+  for (let i = 0; i < arr.length; i++) {
+    arr.push(1);
+    console.log(arr.length);
+    if (arr.length === 50000) {
+      break;
+    }
+  }
 }
